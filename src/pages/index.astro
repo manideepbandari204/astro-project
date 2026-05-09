@@ -1,226 +1,392 @@
 ---
 import Base from '../layouts/Base.astro';
 import Navbar from '../components/Navbar.astro';
+import FeedbackCard from '../components/FeedbackCard.astro';
 
 const WORKER =
   import.meta.env.PUBLIC_WORKER_URL ||
   'https://worker-api.feedback-api-manideep.workers.dev';
+
+let messages = [];
+let fetchError = false;
+
+try {
+  const res = await fetch(`${WORKER}/api/messages`);
+  if (res.ok) {
+    const data = await res.json();
+    messages = data || [];
+  } else {
+    fetchError = true;
+  }
+} catch {
+  fetchError = true;
+}
 ---
 
 <Base title="AnonWall — Feedback Wall">
-
   <Navbar />
 
   <main class="page">
 
-    <!-- HERO -->
+    <!-- ── HERO ───────────────────────────────────── -->
     <section class="hero">
       <p class="eyebrow">Live · Anonymous · Unfiltered</p>
       <h1 class="headline">The <em>Wall</em></h1>
-
       <p class="sub">
-        <span id="count">0</span> messages loaded
+        <span id="count">{messages.length}</span>
+        message{messages.length !== 1 ? 's' : ''} loaded
+        &nbsp;·&nbsp;
+        <a href="/submit">Add yours →</a>
       </p>
     </section>
 
-    <!-- SEARCH + REFRESH -->
+    <!-- ── SEARCH + REFRESH ────────────────────────── -->
     <div class="search-row">
-
-      <input
-        id="searchInput"
-        type="search"
-        placeholder="Search messages..."
-        class="search-input"
-      />
-
-      <button id="refreshBtn" class="refresh-btn">↻</button>
-
+      <div class="search-wrap">
+        <svg class="search-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input
+          type="search"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search messages…"
+          autocomplete="off"
+        />
+      </div>
+      <button class="refresh-btn" id="refreshBtn" title="Refresh messages" aria-label="Refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="refreshIco">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+      </button>
     </div>
 
-    <!-- WALL -->
-    <div class="wall" id="wall"></div>
+    <!-- ── VISIBLE COUNT ───────────────────────────── -->
+    <p class="count-label">
+      Showing <span id="visibleCount">{messages.length}</span> message{messages.length !== 1 ? 's' : ''}
+    </p>
+
+    <!-- ── ERROR STATE ─────────────────────────────── -->
+    {fetchError && (
+      <div class="state-box state-error">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>
+        <span>Could not load messages. Check your <code>PUBLIC_WORKER_URL</code>.</span>
+      </div>
+    )}
+
+    <!-- ── EMPTY STATE ─────────────────────────────── -->
+    {!fetchError && messages.length === 0 && (
+      <div class="state-box state-empty">
+        <div class="empty-icon">◇</div>
+        <p>No messages yet.</p>
+        <a href="/submit" class="empty-cta">Be the first to post →</a>
+      </div>
+    )}
+
+    <!-- ── WALL (SSR render) ───────────────────────── -->
+    <div class="wall" id="wall">
+      {messages.map((m, i) => (
+        <FeedbackCard
+          name={m.name}
+          message={m.message}
+          created_at={m.created_at}
+          index={i}
+        />
+      ))}
+    </div>
+
+    <!-- ── NO SEARCH RESULTS ───────────────────────── -->
+    <div class="state-box state-empty" id="noResults" hidden>
+      <p>No messages match your search.</p>
+    </div>
 
   </main>
-
-  <!-- SCRIPT -->
-  <script define:vars={{ WORKER }}>
-
-    const wall = document.getElementById("wall");
-    const count = document.getElementById("count");
-    const searchInput = document.getElementById("searchInput");
-    const refreshBtn = document.getElementById("refreshBtn");
-
-    let allMessages = [];
-
-    // ---------------- FETCH ----------------
-    async function fetchMessages() {
-      try {
-        const res = await fetch(`${WORKER}/api/messages`);
-        const data = await res.json();
-
-        allMessages = data || [];
-        render(allMessages);
-
-      } catch (err) {
-        console.error("Fetch error:", err);
-      }
-    }
-
-    // ---------------- RENDER ----------------
-    function render(data) {
-      if (!wall) return;
-
-      wall.innerHTML = data.map((m, i) => {
-
-        const initials =
-          (m.name || "A")
-            .slice(0, 2)
-            .toUpperCase();
-
-        const date =
-          new Date(m.created_at).toLocaleString();
-
-        return `
-          <article class="card">
-
-            <div class="card-top">
-
-              <div class="avatar">
-                ${initials}
-              </div>
-
-              <div class="meta">
-                <h3>${m.name || "Anonymous"}</h3>
-                <small>${date}</small>
-              </div>
-
-            </div>
-
-            <p class="msg">
-              ${m.message}
-            </p>
-
-          </article>
-        `;
-      }).join("");
-
-      count.textContent = data.length;
-    }
-
-    // ---------------- SEARCH ----------------
-    searchInput?.addEventListener("input", (e) => {
-      const q = e.target.value.toLowerCase();
-
-      const filtered = allMessages.filter((m) =>
-        (m.name || "").toLowerCase().includes(q) ||
-        (m.message || "").toLowerCase().includes(q)
-      );
-
-      render(filtered);
-    });
-
-    // ---------------- REFRESH ----------------
-    refreshBtn?.addEventListener("click", fetchMessages);
-
-    // ---------------- INIT ----------------
-    fetchMessages();
-
-  </script>
-
 </Base>
 
-<!-- STYLES (RESTORED UI) -->
-<style>
+<!-- ── CLIENT SCRIPT ──────────────────────────────── -->
+<script define:vars={{ WORKER }}>
+  const wall          = document.getElementById('wall');
+  const searchInput   = document.getElementById('searchInput');
+  const visibleCount  = document.getElementById('visibleCount');
+  const countEl       = document.getElementById('count');
+  const refreshBtn    = document.getElementById('refreshBtn');
+  const refreshIco    = document.getElementById('refreshIco');
+  const noResults     = document.getElementById('noResults');
+  let allMessages     = [];
 
+  // ── fetch ──────────────────────────────────────────
+  async function loadMessages() {
+    setRefreshLoading(true);
+    try {
+      const res  = await fetch(`${WORKER}/api/messages`);
+      const data = await res.json();
+      allMessages = data || [];
+      render(allMessages);
+      window.toast?.('Messages refreshed!', 'ok');
+    } catch {
+      window.toast?.('Failed to refresh.', 'err');
+    } finally {
+      setRefreshLoading(false);
+    }
+  }
+
+  function setRefreshLoading(on) {
+    if (refreshIco) refreshIco.style.animation = on ? 'spin .7s linear infinite' : '';
+    if (refreshBtn) refreshBtn.disabled = on;
+  }
+
+  // ── render ─────────────────────────────────────────
+  function render(data) {
+    if (!wall) return;
+
+    if (data.length === 0) {
+      wall.innerHTML = '';
+      if (noResults) noResults.hidden = (searchInput?.value?.trim() === '');
+      update(0);
+      return;
+    }
+
+    if (noResults) noResults.hidden = true;
+
+    wall.innerHTML = data.map((m, i) => {
+      const name    = m.name || 'Anonymous';
+      const hue     = [...name].reduce((a, c) => a + c.charCodeAt(0), 0) % 360;
+      const init    = name.slice(0, 2).toUpperCase();
+      const date    = new Date(m.created_at).toLocaleString('en-IN', {
+        month: 'short', day: 'numeric', year: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      });
+      const msg = (m.message || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      return `
+        <article class="card" style="animation-delay:${i * 55}ms">
+          <div class="card-top">
+            <div class="avatar" style="--hue:${hue}">${init}</div>
+            <div class="meta">
+              <span class="author">${name}</span>
+              <time class="ts">${date}</time>
+            </div>
+          </div>
+          <p class="msg">${msg}</p>
+        </article>`;
+    }).join('');
+
+    update(data.length);
+  }
+
+  function update(n) {
+    if (visibleCount) visibleCount.textContent = String(n);
+    if (countEl)      countEl.textContent       = String(allMessages.length);
+  }
+
+  // ── search ─────────────────────────────────────────
+  searchInput?.addEventListener('input', e => {
+    const q = e.target.value.toLowerCase();
+    if (!q) { render(allMessages); return; }
+    render(allMessages.filter(m =>
+      (m.name    || '').toLowerCase().includes(q) ||
+      (m.message || '').toLowerCase().includes(q)
+    ));
+    if (noResults) noResults.hidden = wall?.children.length > 0;
+  });
+
+  // ── refresh button ─────────────────────────────────
+  refreshBtn?.addEventListener('click', loadMessages);
+
+  // ── init ───────────────────────────────────────────
+  loadMessages();
+</script>
+
+<style>
+/* ── Layout ───────────────────────────────────────── */
 .page {
-  max-width: 750px;
+  max-width: 800px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 52px 24px 80px;
 }
 
+/* ── Hero ─────────────────────────────────────────── */
 .hero {
   text-align: center;
-  margin-bottom: 30px;
+  padding-bottom: 48px;
+  animation: fadeUp .6s ease both;
 }
-
 .eyebrow {
-  color: goldenrod;
-  font-size: 14px;
+  font-family: var(--ff-m);
+  font-size: .68rem;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  display: block;
+  margin-bottom: 14px;
 }
-
 .headline {
-  font-size: 3rem;
-  margin: 10px 0;
+  font-family: var(--ff-d);
+  font-size: clamp(3.2rem, 9vw, 5.8rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--txt);
+  margin-bottom: 14px;
 }
-
+.headline em { font-style: italic; color: var(--gold); }
 .sub {
-  color: gray;
+  color: var(--txt2);
+  font-size: .9rem;
 }
+.sub a { color: var(--gold); font-weight: 600; }
+.sub a:hover { opacity: 1; text-decoration: underline; }
 
+/* ── Search row ───────────────────────────────────── */
 .search-row {
   display: flex;
   gap: 10px;
-  margin-bottom: 20px;
+  align-items: center;
+  margin-bottom: 10px;
+  animation: fadeUp .6s .08s ease both;
 }
-
+.search-wrap { position: relative; flex: 1; }
+.search-ico {
+  position: absolute; left: 12px; top: 50%;
+  transform: translateY(-50%);
+  width: 16px; height: 16px;
+  color: var(--txt3); pointer-events: none;
+}
 .search-input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  width: 100%;
+  padding: 10px 14px 10px 36px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  color: var(--txt);
+  font-family: var(--ff-u);
+  font-size: .88rem;
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
 }
-
+.search-input::placeholder { color: var(--txt3); }
+.search-input:focus {
+  border-color: var(--border-g);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
 .refresh-btn {
-  padding: 10px 15px;
-  cursor: pointer;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--rs);
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: border-color .2s, color .2s;
+}
+.refresh-btn svg {
+  width: 16px; height: 16px;
+  color: var(--txt2);
+  transition: color .2s;
+}
+.refresh-btn:hover { border-color: var(--border-g); }
+.refresh-btn:hover svg { color: var(--gold); }
+.refresh-btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Count label ──────────────────────────────────── */
+.count-label {
+  font-family: var(--ff-m);
+  font-size: .7rem;
+  letter-spacing: .04em;
+  color: var(--txt3);
+  margin-bottom: 22px;
+  animation: fadeUp .6s .12s ease both;
 }
 
+/* ── Feedback wall grid ───────────────────────────── */
 .wall {
   display: grid;
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
 }
 
-/* CARD UI (RESTORED STYLE) */
-.card {
-  padding: 16px;
-  border-radius: 12px;
-  background: #fff;
-  border: 1px solid #eee;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-.card-top {
+/* ── Card (used by both SSR + JS render) ──────────── */
+:global(.card), .card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 20px;
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+  opacity: 0;
+  animation: fadeUp .45s ease forwards;
+  transition: background .18s, border-color .18s, transform .18s;
+}
+:global(.card:hover), .card:hover {
+  background: var(--card-hover);
+  border-color: var(--border-g);
+  transform: translateY(-2px);
+}
+:global(.card-top), .card-top {
+  display: flex; align-items: center; gap: 10px;
+}
+:global(.avatar), .avatar {
+  width: 36px; height: 36px;
+  border-radius: 9px;
+  background: hsl(var(--hue, 220), 35%, 18%);
+  border: 1px solid hsl(var(--hue, 220), 40%, 32%);
+  color: hsl(var(--hue, 220), 55%, 68%);
+  display: grid; place-items: center;
+  font-family: var(--ff-d);
+  font-size: .78rem; font-weight: 700;
+  flex-shrink: 0;
+}
+:global(.meta), .meta {
+  display: flex; flex-direction: column; gap: 1px;
+}
+:global(.author), .author {
+  font-size: .875rem; font-weight: 600; color: var(--txt);
+}
+:global(.ts), .ts {
+  font-family: var(--ff-m);
+  font-size: .68rem; color: var(--txt3);
+  letter-spacing: .02em;
+}
+:global(.msg), .msg {
+  font-size: .9rem; color: var(--txt2);
+  line-height: 1.68; word-break: break-word;
+  white-space: pre-wrap;
+}
+
+/* ── State boxes ──────────────────────────────────── */
+.state-box {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--txt2);
+  font-size: .9rem;
 }
-
-.avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: #6c5ce7;
-  color: white;
-  display: flex;
-  align-items: center;
+.state-error {
+  flex-direction: row;
   justify-content: center;
-  font-weight: bold;
+  background: rgba(224,96,96,.08);
+  border: 1px solid rgba(224,96,96,.22);
+  border-radius: var(--r);
+  padding: 14px 18px;
+  color: var(--red);
+  margin-bottom: 24px;
 }
-
-.meta h3 {
-  margin: 0;
-  font-size: 16px;
+.state-error code {
+  font-family: var(--ff-m);
+  font-size: .82em;
+  background: rgba(224,96,96,.12);
+  padding: 1px 5px;
+  border-radius: 4px;
 }
-
-.meta small {
-  color: gray;
-  font-size: 12px;
+.empty-icon {
+  font-size: 2.6rem; color: var(--txt3); margin-bottom: 4px;
 }
-
-.msg {
-  margin: 0;
-  font-size: 15px;
+.empty-cta {
+  color: var(--gold); font-weight: 600; font-size: .88rem;
 }
-
 </style>
