@@ -1,0 +1,14 @@
+{
+  "name": "anonymous-feedback-wall",
+  "type": "module",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^13.5.0",
+    "astro": "^6.3.1"
+  }
+}

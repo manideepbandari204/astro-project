@@ -1,0 +1,217 @@
+---
+import Base from '../layouts/Base.astro';
+import Navbar from '../components/Navbar.astro';
+
+const WORKER = import.meta.env.PUBLIC_WORKER_URL || 'https://feedback-worker-api.YOUR_SUBDOMAIN.workers.dev';
+---
+<Base title="Submit Feedback — AnonWall">
+  <Navbar />
+
+  <main class="page">
+    <section class="hero" style="animation: fadeUp .6s ease both">
+      <p class="eyebrow">Speak freely</p>
+      <h1 class="headline">Post <em>anonymously</em></h1>
+      <p class="sub">No login. No tracking. Just your words.</p>
+    </section>
+
+    <form class="form" id="feedbackForm" novalidate>
+
+      <!-- Name field -->
+      <div class="field">
+        <label class="label" for="name">
+          Name <span class="tag optional">optional</span>
+        </label>
+        <input
+          type="text"
+          id="name"
+          name="name"
+          class="input"
+          placeholder="Leave blank to stay anonymous"
+          maxlength="50"
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Message field -->
+      <div class="field">
+        <label class="label" for="message">
+          Message <span class="tag required">required</span>
+        </label>
+        <textarea
+          id="message"
+          name="message"
+          class="input textarea"
+          placeholder="What's on your mind? Be honest, be kind…"
+          maxlength="500"
+          rows="6"
+          required
+        ></textarea>
+        <div class="field-foot">
+          <span class="hint" id="hint"></span>
+          <span class="counter" id="counter">
+            <span id="cCount">0</span><span class="cMax">/500</span>
+          </span>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <span class="btn-label">Post Anonymously</span>
+        <span class="btn-arrow">→</span>
+        <span class="btn-spin" id="btnSpin" hidden>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+          </svg>
+        </span>
+      </button>
+    </form>
+  </main>
+
+  <script define:vars={{ WORKER }}>
+    const form = document.getElementById('feedbackForm');
+    const msgEl = document.getElementById('message');
+    const cCount = document.getElementById('cCount');
+    const counter = document.getElementById('counter');
+    const hint = document.getElementById('hint');
+    const submitBtn = document.getElementById('submitBtn');
+    const btnLabel = submitBtn?.querySelector('.btn-label');
+    const btnArrow = submitBtn?.querySelector('.btn-arrow');
+    const btnSpin = document.getElementById('btnSpin');
+
+    // ── Character counter ──────────────────────────────────────────────
+    msgEl?.addEventListener('input', () => {
+      const len = msgEl.value.length;
+      if (cCount) cCount.textContent = len;
+      counter?.classList.toggle('warn', len > 400);
+      counter?.classList.toggle('danger', len > 480);
+      if (hint) hint.textContent = '';
+      msgEl.classList.remove('err');
+    });
+
+    // ── Submit ─────────────────────────────────────────────────────────
+    form?.addEventListener('submit', async e => {
+      e.preventDefault();
+      const name = form.querySelector('#name')?.value?.trim() || 'Anonymous';
+      const message = msgEl?.value?.trim() || '';
+
+      if (!message) {
+        msgEl?.classList.add('err');
+        if (hint) hint.textContent = 'Message cannot be empty.';
+        msgEl?.focus();
+        return;
+      }
+      if (message.length < 3) {
+        msgEl?.classList.add('err');
+        if (hint) hint.textContent = 'Too short — at least 3 characters.';
+        return;
+      }
+
+      // Loading state
+      if (submitBtn) submitBtn.disabled = true;
+      if (btnLabel) btnLabel.style.display = 'none';
+      if (btnArrow) btnArrow.style.display = 'none';
+      if (btnSpin) btnSpin.hidden = false;
+
+      try {
+        const res = await fetch(`${WORKER}/api/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, message }),
+        });
+        const data = await res.json();
+
+        if (res.ok) {
+          window.toast?.('Message posted!', 'ok');
+          form.reset();
+          if (cCount) cCount.textContent = '0';
+          counter?.classList.remove('warn','danger');
+          setTimeout(() => window.location.href = '/', 1000);
+        } else {
+          window.toast?.(data.error || 'Submission failed.', 'err');
+        }
+      } catch {
+        window.toast?.('Network error. Please try again.', 'err');
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (btnLabel) btnLabel.style.display = '';
+        if (btnArrow) btnArrow.style.display = '';
+        if (btnSpin) btnSpin.hidden = true;
+      }
+    });
+  </script>
+</Base>
+
+<style>
+.page {
+  max-width: 560px; margin: 0 auto;
+  padding: 52px 24px 80px;
+}
+.hero {
+  margin-bottom: 44px;
+}
+.eyebrow {
+  font-family: var(--ff-m); font-size: .7rem;
+  letter-spacing: .14em; text-transform: uppercase;
+  color: var(--gold); display: block; margin-bottom: 14px;
+}
+.headline {
+  font-family: var(--ff-d); font-size: clamp(2.4rem,6vw,3.6rem);
+  font-weight: 900; line-height: 1.1; color: var(--txt); margin-bottom: 10px;
+}
+.headline em { font-style: italic; color: var(--gold); }
+.sub { color: var(--txt2); font-size: .93rem; }
+
+.form {
+  display: flex; flex-direction: column; gap: 26px;
+  animation: fadeUp .6s .1s ease both;
+}
+.field { display: flex; flex-direction: column; gap: 8px; }
+.label {
+  font-size: .78rem; font-weight: 600;
+  letter-spacing: .07em; text-transform: uppercase;
+  color: var(--txt2); display: flex; align-items: center; gap: 8px;
+}
+.tag {
+  font-family: var(--ff-m); font-size: .65rem; padding: 2px 6px;
+  border-radius: 4px; font-weight: 400; text-transform: none; letter-spacing: .02em;
+}
+.tag.optional { background: var(--border); color: var(--txt3); }
+.tag.required { background: var(--gold-dim); color: var(--gold); }
+
+.input {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 13px 15px;
+  color: var(--txt); font-family: var(--ff-u); font-size: .93rem;
+  outline: none; width: 100%;
+  transition: border-color .2s, box-shadow .2s;
+}
+.input::placeholder { color: var(--txt3); }
+.input:focus { border-color: var(--border-g); box-shadow: 0 0 0 3px var(--gold-glow); }
+.input.err { border-color: var(--red); box-shadow: 0 0 0 3px rgba(224,96,96,.1); }
+.textarea { resize: vertical; min-height: 140px; line-height: 1.6; }
+
+.field-foot {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 2px;
+}
+.hint { font-size: .78rem; color: var(--red); min-height: 16px; }
+.counter {
+  font-family: var(--ff-m); font-size: .72rem; color: var(--txt3);
+  transition: color .2s;
+}
+.counter.warn { color: #d4a030; }
+.counter.danger { color: var(--red); }
+.cMax { color: var(--txt3); }
+
+.submit-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: var(--gold); color: #0a0a10;
+  border: none; border-radius: var(--r);
+  padding: 14px 28px; font-family: var(--ff-u);
+  font-size: .95rem; font-weight: 700; cursor: pointer;
+  transition: opacity .2s, transform .15s;
+  align-self: flex-start;
+}
+.submit-btn:hover:not(:disabled) { opacity: .88; transform: translateY(-1px); }
+.submit-btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn-spin svg { width: 18px; height: 18px; animation: spin .8s linear infinite; }
+</style>

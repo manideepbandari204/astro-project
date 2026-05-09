@@ -1,0 +1,70 @@
+---
+const path = Astro.url.pathname;
+---
+<header class="nav">
+  <div class="nav-inner">
+    <a href="/" class="logo">
+      <span class="logo-gem">◆</span>
+      <span>AnonWall</span>
+    </a>
+    <nav class="links">
+      <a href="/" class:list={['lnk', {active: path === '/'}]}>Wall</a>
+      <a href="/submit" class:list={['lnk', {active: path === '/submit'}]}>Submit</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">
+      <span id="themeIco">☽</span>
+    </button>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('themeBtn');
+  const ico = document.getElementById('themeIco');
+  const html = document.documentElement;
+  const update = () => { if(ico) ico.textContent = html.dataset.theme === 'dark' ? '☽' : '○'; };
+  update();
+  btn?.addEventListener('click', () => {
+    const next = html.dataset.theme === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+    update();
+  });
+</script>
+
+<style>
+.nav {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(8,8,16,.82);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+}
+[data-theme="light"] .nav { background: rgba(245,243,238,.88); }
+.nav-inner {
+  max-width: 900px; margin: 0 auto;
+  padding: 0 24px; height: 58px;
+  display: flex; align-items: center; gap: 16px;
+}
+.logo {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--ff-d); font-size: 1.1rem; font-weight: 700;
+  color: var(--txt); margin-right: auto; text-decoration: none;
+}
+.logo:hover { opacity: 1; }
+.logo-gem { color: var(--gold); font-size: .9rem; }
+.links { display: flex; gap: 2px; }
+.lnk {
+  padding: 5px 14px; border-radius: var(--rs);
+  color: var(--txt2); font-size: .875rem; font-weight: 500;
+  text-decoration: none; transition: all .2s;
+}
+.lnk:hover { color: var(--txt); background: var(--border); opacity: 1; }
+.lnk.active { color: var(--gold); background: var(--gold-dim); }
+.theme-btn {
+  background: none; border: 1px solid var(--border);
+  border-radius: var(--rs); width: 32px; height: 32px;
+  display: grid; place-items: center;
+  cursor: pointer; color: var(--txt2); font-size: 13px;
+  transition: all .2s;
+}
+.theme-btn:hover { border-color: var(--border-g); color: var(--gold); }
+</style>

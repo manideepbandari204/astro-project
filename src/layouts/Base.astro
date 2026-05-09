@@ -1,0 +1,51 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+}
+const {
+  title = 'AnonWall — Anonymous Feedback',
+  description = 'Post anonymous messages. No account needed.',
+} = Astro.props;
+---
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content={description} />
+  <title>{title}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◆</text></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+</head>
+<body>
+  <slot />
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    // Persist theme
+    const saved = localStorage.getItem('theme') ?? 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+
+    // Global toast helper
+    window.toast = (msg, type = 'inf', ms = 3400) => {
+      const wrap = document.getElementById('toastWrap');
+      if (!wrap) return;
+      const icons = { ok: '✓', err: '✕', inf: '◆' };
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<span>${icons[type]||'◆'}</span><span>${msg}</span>`;
+      wrap.appendChild(el);
+      setTimeout(() => {
+        el.style.cssText = 'opacity:0;transform:translateX(14px);transition:.25s';
+        setTimeout(() => el.remove(), 260);
+      }, ms);
+    };
+  </script>
+</body>
+</html>
+
+<style is:global>
+  @import '../styles/global.css';
+</style>

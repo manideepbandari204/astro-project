@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+import Navbar from '../components/Navbar.astro';
+---
+<Base title="404 — AnonWall">
+  <Navbar />
+  <main style="max-width:600px;margin:0 auto;padding:120px 24px;text-align:center">
+    <p style="font-family:var(--ff-m);font-size:.7rem;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;margin-bottom:16px">404</p>
+    <h1 style="font-family:var(--ff-d);font-size:3.5rem;font-weight:900;color:var(--txt);margin-bottom:12px">Page not found</h1>
+    <p style="color:var(--txt2);margin-bottom:28px">The page you're looking for doesn't exist.</p>
+    <a href="/" style="color:var(--gold);font-weight:600">← Back to the Wall</a>
+  </main>
+</Base>

@@ -1,0 +1,188 @@
+<!DOCTYPE html><html lang="en" data-theme="dark"> <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Post anonymous messages. No account needed."><title>AnonWall — Feedback Wall</title><link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◆</text></svg>"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><style>@import"https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap";:root{--bg: #080810;--bg2: #0e0e1a;--bg3: #141425;--card: #121220;--card-hover: #181830;--gold: #d4a847;--gold-dim: rgba(212,168,71,.14);--gold-glow: rgba(212,168,71,.07);--txt: #eeeaf0;--txt2: #7e7c8e;--txt3: #3f3d50;--border: rgba(255,255,255,.06);--border-g: rgba(212,168,71,.28);--red: #e06060;--green: #5ddba0;--r: 14px;--rs: 7px;--ff-d: "Fraunces", Georgia, serif;--ff-u: "Syne", system-ui, sans-serif;--ff-m: "JetBrains Mono", monospace}[data-theme=light]{--bg: #f5f3ee;--bg2: #edeae3;--bg3: #e4e0d6;--card: #ffffff;--card-hover: #f9f8f4;--gold: #a07820;--gold-dim: rgba(160,120,32,.1);--gold-glow: rgba(160,120,32,.05);--txt: #18161f;--txt2: #5a5868;--txt3: #b0aec0;--border: rgba(0,0,0,.07);--border-g: rgba(160,120,32,.35)}*,*:before,*:after{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}body{background:var(--bg);color:var(--txt);font-family:var(--ff-u);font-size:16px;line-height:1.6;min-height:100vh;transition:background .3s,color .3s;position:relative}body:before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 40% at 80% 10%,rgba(212,168,71,.06) 0%,transparent 60%),radial-gradient(ellipse 40% 50% at 10% 80%,rgba(100,80,180,.05) 0%,transparent 60%)}body>*{position:relative;z-index:1}a{color:var(--gold);text-decoration:none}a:hover{opacity:.8}::selection{background:var(--gold-dim);color:var(--txt)}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--txt3);border-radius:3px}@keyframes fadeUp{0%{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}@keyframes fadeIn{0%{opacity:0}to{opacity:1}}@keyframes spin{to{transform:rotate(360deg)}}.toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}.toast{display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:var(--r);font-family:var(--ff-u);font-size:.84rem;font-weight:500;backdrop-filter:blur(16px);pointer-events:all;max-width:290px;box-shadow:0 6px 28px #0006;border:1px solid;animation:fadeUp .3s ease both}.toast.ok{background:#5ddba01c;border-color:#5ddba052;color:var(--green)}.toast.err{background:#e060601c;border-color:#e0606052;color:var(--red)}.toast.inf{background:var(--gold-dim);border-color:var(--border-g);color:var(--gold)}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}.nav[data-astro-cid-5blmo7yk]{position:sticky;top:0;z-index:100;background:#080810d1;backdrop-filter:blur(18px);border-bottom:1px solid var(--border)}[data-astro-cid-5blmo7yk][data-theme=light] .nav[data-astro-cid-5blmo7yk]{background:#f5f3eee0}.nav-inner[data-astro-cid-5blmo7yk]{max-width:900px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;gap:16px}.logo[data-astro-cid-5blmo7yk]{display:flex;align-items:center;gap:8px;font-family:var(--ff-d);font-size:1.1rem;font-weight:700;color:var(--txt);margin-right:auto;text-decoration:none}.logo[data-astro-cid-5blmo7yk]:hover{opacity:1}.logo-gem[data-astro-cid-5blmo7yk]{color:var(--gold);font-size:.9rem}.links[data-astro-cid-5blmo7yk]{display:flex;gap:2px}.lnk[data-astro-cid-5blmo7yk]{padding:5px 14px;border-radius:var(--rs);color:var(--txt2);font-size:.875rem;font-weight:500;text-decoration:none;transition:all .2s}.lnk[data-astro-cid-5blmo7yk]:hover{color:var(--txt);background:var(--border);opacity:1}.lnk[data-astro-cid-5blmo7yk].active{color:var(--gold);background:var(--gold-dim)}.theme-btn[data-astro-cid-5blmo7yk]{background:none;border:1px solid var(--border);border-radius:var(--rs);width:32px;height:32px;display:grid;place-items:center;cursor:pointer;color:var(--txt2);font-size:13px;transition:all .2s}.theme-btn[data-astro-cid-5blmo7yk]:hover{border-color:var(--border-g);color:var(--gold)}
+.card[data-astro-cid-ytdl6gdd]{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:14px;opacity:0;animation:fadeUp .5s ease forwards;transition:background .2s,border-color .2s,transform .2s}.card[data-astro-cid-ytdl6gdd]:hover{background:var(--card-hover);border-color:var(--border-g);transform:translateY(-2px)}.card-top[data-astro-cid-ytdl6gdd]{display:flex;align-items:center;gap:12px}.avatar[data-astro-cid-ytdl6gdd]{width:38px;height:38px;border-radius:10px;background:hsl(var(--hue,220),40%,22%);border:1px solid hsl(var(--hue,220),40%,35%);color:hsl(var(--hue,220),60%,72%);display:grid;place-items:center;font-family:var(--ff-d);font-size:.8rem;font-weight:700;flex-shrink:0}.meta[data-astro-cid-ytdl6gdd]{display:flex;flex-direction:column;gap:1px}.author[data-astro-cid-ytdl6gdd]{font-weight:600;font-size:.875rem;color:var(--txt);font-family:var(--ff-u)}.time[data-astro-cid-ytdl6gdd]{font-family:var(--ff-m);font-size:.72rem;color:var(--txt3);letter-spacing:.02em}.msg[data-astro-cid-ytdl6gdd]{font-size:.95rem;color:var(--txt2);line-height:1.65;white-space:pre-wrap;word-break:break-word}.page[data-astro-cid-j7pv25f6]{max-width:760px;margin:0 auto;padding:48px 24px 80px}.hero[data-astro-cid-j7pv25f6]{text-align:center;padding:20px 0 48px}.eyebrow[data-astro-cid-j7pv25f6]{font-size:.8rem;color:#daa520}.headline[data-astro-cid-j7pv25f6]{font-size:4rem;margin:10px 0}.sub[data-astro-cid-j7pv25f6]{color:gray}.search-row[data-astro-cid-j7pv25f6]{display:flex;gap:10px;margin-bottom:16px}.search-wrap[data-astro-cid-j7pv25f6]{flex:1}.search-input[data-astro-cid-j7pv25f6]{width:100%;padding:10px}.refresh-btn[data-astro-cid-j7pv25f6]{padding:10px 14px;cursor:pointer}.wall[data-astro-cid-j7pv25f6]{display:grid;gap:16px}.empty-state[data-astro-cid-j7pv25f6],.error-state[data-astro-cid-j7pv25f6]{text-align:center;padding:40px}.no-results[data-astro-cid-j7pv25f6]{text-align:center;margin-top:20px}
+</style></head> <body>  <header class="nav" data-astro-cid-5blmo7yk> <div class="nav-inner" data-astro-cid-5blmo7yk> <a href="/" class="logo" data-astro-cid-5blmo7yk> <span class="logo-gem" data-astro-cid-5blmo7yk>◆</span> <span data-astro-cid-5blmo7yk>AnonWall</span> </a> <nav class="links" data-astro-cid-5blmo7yk> <a href="/" class="lnk active" data-astro-cid-5blmo7yk>Wall</a> <a href="/submit" class="lnk" data-astro-cid-5blmo7yk>Submit</a> </nav> <button class="theme-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme" data-astro-cid-5blmo7yk> <span id="themeIco" data-astro-cid-5blmo7yk>☽</span> </button> </div> </header> <script type="module">globalThis.process??={};globalThis.process.env??={};const c=document.getElementById("themeBtn"),n=document.getElementById("themeIco"),t=document.documentElement,o=()=>{n&&(n.textContent=t.dataset.theme==="dark"?"☽":"○")};o();c?.addEventListener("click",()=>{const e=t.dataset.theme==="dark"?"light":"dark";t.setAttribute("data-theme",e),localStorage.setItem("theme",e),o()});</script> <main class="page" data-astro-cid-j7pv25f6> <!-- HERO --> <section class="hero" data-astro-cid-j7pv25f6> <p class="eyebrow" data-astro-cid-j7pv25f6>
+Live · Anonymous · Unfiltered
+</p> <h1 class="headline" data-astro-cid-j7pv25f6>
+The <em data-astro-cid-j7pv25f6>Wall</em> </h1> <p class="sub" data-astro-cid-j7pv25f6> 4 messages and counting.
+<a href="/submit" data-astro-cid-j7pv25f6>Add yours →</a> </p> </section> <!-- SEARCH --> <div class="search-row" data-astro-cid-j7pv25f6> <div class="search-wrap" data-astro-cid-j7pv25f6> <span class="search-icon" data-astro-cid-j7pv25f6>⌕</span> <input type="search" id="searchInput" class="search-input" placeholder="Search messages…" autocomplete="off" data-astro-cid-j7pv25f6> </div> <button class="refresh-btn" id="refreshBtn" title="Refresh messages" data-astro-cid-j7pv25f6> <span id="refreshIco" data-astro-cid-j7pv25f6>↻</span> </button> </div> <!-- COUNT --> <p class="count-label" id="countLabel" data-astro-cid-j7pv25f6>
+Showing
+<span id="visibleCount" data-astro-cid-j7pv25f6> 4 </span>
+messages </p> <!-- ERROR -->  <!-- EMPTY -->  <!-- WALL --> <div class="wall" id="wall" data-astro-cid-j7pv25f6> <article class="card" style="animation-delay:0ms" data-astro-cid-ytdl6gdd> <div class="card-top" data-astro-cid-ytdl6gdd> <div class="avatar" style="--hue:285" data-astro-cid-ytdl6gdd> SA </div> <div class="meta" data-astro-cid-ytdl6gdd> <span class="author" data-astro-cid-ytdl6gdd>Sai</span> <time class="time" datetime="2026-05-08T15:06:19.687475" data-astro-cid-ytdl6gdd>May 8, 2026, 03:06 PM</time> </div> </div> <p class="msg" data-astro-cid-ytdl6gdd>My name is sai</p> </article><article class="card" style="animation-delay:60ms" data-astro-cid-ytdl6gdd> <div class="card-top" data-astro-cid-ytdl6gdd> <div class="avatar" style="--hue:42" data-astro-cid-ytdl6gdd> RA </div> <div class="meta" data-astro-cid-ytdl6gdd> <span class="author" data-astro-cid-ytdl6gdd>Raju</span> <time class="time" datetime="2026-05-08T15:00:47.907543" data-astro-cid-ytdl6gdd>May 8, 2026, 03:00 PM</time> </div> </div> <p class="msg" data-astro-cid-ytdl6gdd>My site is working</p> </article><article class="card" style="animation-delay:120ms" data-astro-cid-ytdl6gdd> <div class="card-top" data-astro-cid-ytdl6gdd> <div class="avatar" style="--hue:29" data-astro-cid-ytdl6gdd> MA </div> <div class="meta" data-astro-cid-ytdl6gdd> <span class="author" data-astro-cid-ytdl6gdd>Mani</span> <time class="time" datetime="2026-05-08T14:31:41.157947" data-astro-cid-ytdl6gdd>May 8, 2026, 02:31 PM</time> </div> </div> <p class="msg" data-astro-cid-ytdl6gdd>Hello this is my first feedback</p> </article><article class="card" style="animation-delay:180ms" data-astro-cid-ytdl6gdd> <div class="card-top" data-astro-cid-ytdl6gdd> <div class="avatar" style="--hue:83" data-astro-cid-ytdl6gdd> MA </div> <div class="meta" data-astro-cid-ytdl6gdd> <span class="author" data-astro-cid-ytdl6gdd>Manideep</span> <time class="time" datetime="2026-05-08T14:24:23.721615" data-astro-cid-ytdl6gdd>May 8, 2026, 02:24 PM</time> </div> </div> <p class="msg" data-astro-cid-ytdl6gdd>Hello this is my first feedback</p> </article> </div> <!-- NO RESULTS --> <div class="no-results" id="noResults" hidden data-astro-cid-j7pv25f6> <p data-astro-cid-j7pv25f6>No messages match your search.</p> </div> </main>  <script>(function(){const WORKER = "https://worker-api.feedback-api-manideep.workers.dev";
+
+
+    // SEARCH
+    const searchInput =
+      document.getElementById('searchInput');
+
+    const wall =
+      document.getElementById('wall');
+
+    const noResults =
+      document.getElementById('noResults');
+
+    const visibleCount =
+      document.getElementById('visibleCount');
+
+    function updateSearch(q) {
+
+      if (!wall) return;
+
+      const cards =
+        wall.querySelectorAll('article.card');
+
+      let visible = 0;
+
+      cards.forEach(card => {
+
+        const text =
+          card.textContent?.toLowerCase() || '';
+
+        const show =
+          !q || text.includes(q.toLowerCase());
+
+        card.style.display = show ? '' : 'none';
+
+        if (show) visible++;
+
+      });
+
+      if (noResults) {
+        noResults.hidden =
+          visible > 0 || q === '';
+      }
+
+      if (visibleCount) {
+        visibleCount.textContent =
+          String(visible);
+      }
+
+    }
+
+    searchInput?.addEventListener('input', e => {
+      updateSearch(e.target.value.trim());
+    });
+
+    // REFRESH
+    const refreshBtn =
+      document.getElementById('refreshBtn');
+
+    const refreshIco =
+      document.getElementById('refreshIco');
+
+    refreshBtn?.addEventListener(
+      'click',
+      async () => {
+
+        refreshIco?.classList.add('spinning');
+
+        try {
+
+          const res =
+            await fetch(`${WORKER}/api/messages`);
+
+          if (!res.ok) throw new Error();
+
+          const data = await res.json();
+
+          // FIXED
+          renderMessages(data || []);
+
+          alert("Messages refreshed!");
+
+        } catch {
+
+          alert("Failed to refresh!");
+
+        } finally {
+
+          setTimeout(() => {
+            refreshIco?.classList.remove('spinning');
+          }, 600);
+
+        }
+
+      }
+    );
+
+    // RENDER
+    function renderMessages(msgs) {
+
+      if (!wall) return;
+
+      if (msgs.length === 0) {
+
+        wall.innerHTML = '';
+
+        return;
+
+      }
+
+      wall.innerHTML = msgs.map((m, i) => {
+
+        const hue =
+          [...(m.name || 'X')]
+            .reduce((a, c) =>
+              a + c.charCodeAt(0), 0
+            ) % 360;
+
+        const initials =
+          (m.name || 'A')
+            .slice(0, 2)
+            .toUpperCase();
+
+        const date =
+          new Date(m.created_at)
+            .toLocaleString();
+
+        return `
+
+          <article
+            class="card"
+            style="animation-delay:${i * 60}ms"
+          >
+
+            <div class="card-top">
+
+              <div
+                class="avatar"
+                style="--hue:${hue}"
+              >
+                ${initials}
+              </div>
+
+              <div class="meta">
+
+                <span class="author">
+                  ${m.name || 'Anonymous'}
+                </span>
+
+                <time class="time">
+                  ${date}
+                </time>
+
+              </div>
+
+            </div>
+
+            <p class="msg">
+              ${m.message}
+            </p>
+
+          </article>
+
+        `;
+
+      }).join('');
+
+      if (visibleCount) {
+        visibleCount.textContent =
+          String(msgs.length);
+      }
+
+      updateSearch(
+        searchInput?.value?.trim() || ''
+      );
+
+    }
+
+  })();</script>  <div class="toast-wrap" id="toastWrap"></div> <script type="module">globalThis.process??={};globalThis.process.env??={};const r=localStorage.getItem("theme")??"dark";document.documentElement.setAttribute("data-theme",r);window.toast=(n,e="inf",a=3400)=>{const s=document.getElementById("toastWrap");if(!s)return;const o={ok:"✓",err:"✕",inf:"◆"},t=document.createElement("div");t.className=`toast ${e}`,t.innerHTML=`<span>${o[e]||"◆"}</span><span>${n}</span>`,s.appendChild(t),setTimeout(()=>{t.style.cssText="opacity:0;transform:translateX(14px);transition:.25s",setTimeout(()=>t.remove(),260)},a)};</script> </body> </html> 
