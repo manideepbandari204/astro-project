@@ -3,30 +3,9 @@ import Base from '../layouts/Base.astro';
 import Navbar from '../components/Navbar.astro';
 import FeedbackCard from '../components/FeedbackCard.astro';
 
-// WORKER URL
 const WORKER =
   import.meta.env.PUBLIC_WORKER_URL ||
   'https://worker-api.feedback-api-manideep.workers.dev';
-
-// FETCH MESSAGES
-let messages = [];
-let fetchError = false;
-
-try {
-  const res = await fetch(`${WORKER}/api/messages`);
-
-  if (res.ok) {
-    const data = await res.json();
-
-    // FIXED
-    messages = data || [];
-  } else {
-    fetchError = true;
-  }
-
-} catch {
-  fetchError = true;
-}
 ---
 
 <Base title="AnonWall — Feedback Wall">
@@ -38,292 +17,104 @@ try {
     <!-- HERO -->
     <section class="hero">
 
-      <p class="eyebrow">
-        Live · Anonymous · Unfiltered
-      </p>
+      <p class="eyebrow">Live · Anonymous · Unfiltered</p>
 
-      <h1 class="headline">
-        The <em>Wall</em>
-      </h1>
+      <h1 class="headline">The <em>Wall</em></h1>
 
       <p class="sub">
-        {messages.length} message{messages.length !== 1 ? 's' : ''} and counting.
-        <a href="/submit">Add yours →</a>
+        <span id="count">0</span> messages loaded
       </p>
 
     </section>
 
-    <!-- SEARCH -->
+    <!-- SEARCH + REFRESH -->
     <div class="search-row">
 
-      <div class="search-wrap">
+      <input
+        type="search"
+        id="searchInput"
+        placeholder="Search messages..."
+        class="search-input"
+      />
 
-        <span class="search-icon">⌕</span>
-
-        <input
-          type="search"
-          id="searchInput"
-          class="search-input"
-          placeholder="Search messages…"
-          autocomplete="off"
-        />
-
-      </div>
-
-      <button
-        class="refresh-btn"
-        id="refreshBtn"
-        title="Refresh messages"
-      >
-        <span id="refreshIco">↻</span>
-      </button>
+      <button id="refreshBtn">↻</button>
 
     </div>
 
-    <!-- COUNT -->
-    <p class="count-label" id="countLabel">
-
-      Showing
-      <span id="visibleCount">
-        {messages.length}
-      </span>
-
-      message{messages.length !== 1 ? 's' : ''}
-
-    </p>
-
-    <!-- ERROR -->
-    {fetchError && (
-
-      <div class="error-state">
-
-        <p>
-          ⚠ Could not load messages.
-        </p>
-
-      </div>
-
-    )}
-
-    <!-- EMPTY -->
-    {!fetchError && messages.length === 0 && (
-
-      <div class="empty-state">
-
-        <span class="empty-icon">◇</span>
-
-        <p>No messages yet.</p>
-
-        <a href="/submit" class="cta-link">
-          Be the first →
-        </a>
-
-      </div>
-
-    )}
-
-    <!-- WALL -->
-    <div class="wall" id="wall">
-
-      {messages.map((m, i) => (
-
-        <FeedbackCard
-          name={m.name}
-          message={m.message}
-          created_at={m.created_at}
-          index={i}
-        />
-
-      ))}
-
-    </div>
-
-    <!-- NO RESULTS -->
-    <div class="no-results" id="noResults" hidden>
-
-      <p>No messages match your search.</p>
-
-    </div>
+    <!-- WALL (IMPORTANT: EMPTY INITIALLY) -->
+    <div class="wall" id="wall"></div>
 
   </main>
 
   <!-- SCRIPT -->
   <script define:vars={{ WORKER }}>
 
-    // SEARCH
-    const searchInput =
-      document.getElementById('searchInput');
+    const wall = document.getElementById("wall");
+    const searchInput = document.getElementById("searchInput");
+    const count = document.getElementById("count");
+    const refreshBtn = document.getElementById("refreshBtn");
 
-    const wall =
-      document.getElementById('wall');
+    let allMessages = [];
 
-    const noResults =
-      document.getElementById('noResults');
-
-    const visibleCount =
-      document.getElementById('visibleCount');
-
-    function updateSearch(q) {
+    // ---------------------------
+    // RENDER FUNCTION
+    // ---------------------------
+    function renderMessages(data) {
+      allMessages = data;
 
       if (!wall) return;
 
-      const cards =
-        wall.querySelectorAll('article.card');
+      wall.innerHTML = data.map((m) => {
+        return `
+          <div class="card">
+            <h3>${m.name || "Anonymous"}</h3>
+            <p>${m.message}</p>
+            <small>${new Date(m.created_at).toLocaleString()}</small>
+          </div>
+        `;
+      }).join("");
 
-      let visible = 0;
-
-      cards.forEach(card => {
-
-        const text =
-          card.textContent?.toLowerCase() || '';
-
-        const show =
-          !q || text.includes(q.toLowerCase());
-
-        card.style.display = show ? '' : 'none';
-
-        if (show) visible++;
-
-      });
-
-      if (noResults) {
-        noResults.hidden =
-          visible > 0 || q === '';
-      }
-
-      if (visibleCount) {
-        visibleCount.textContent =
-          String(visible);
-      }
-
+      count.textContent = data.length;
     }
 
-    searchInput?.addEventListener('input', e => {
-      updateSearch(e.target.value.trim());
-    });
+    // ---------------------------
+    // FETCH DATA
+    // ---------------------------
+    async function loadMessages() {
+      try {
+        const res = await fetch(`${WORKER}/api/messages`);
+        const data = await res.json();
 
-    // REFRESH
-    const refreshBtn =
-      document.getElementById('refreshBtn');
+        renderMessages(data || []);
 
-    const refreshIco =
-      document.getElementById('refreshIco');
-
-    refreshBtn?.addEventListener(
-      'click',
-      async () => {
-
-        refreshIco?.classList.add('spinning');
-
-        try {
-
-          const res =
-            await fetch(`${WORKER}/api/messages`);
-
-          if (!res.ok) throw new Error();
-
-          const data = await res.json();
-
-          // FIXED
-          renderMessages(data || []);
-
-          alert("Messages refreshed!");
-
-        } catch {
-
-          alert("Failed to refresh!");
-
-        } finally {
-
-          setTimeout(() => {
-            refreshIco?.classList.remove('spinning');
-          }, 600);
-
-        }
-
+      } catch (err) {
+        console.error("Fetch error:", err);
       }
-    );
+    }
 
-    // RENDER
-    function renderMessages(msgs) {
+    // ---------------------------
+    // SEARCH
+    // ---------------------------
+    searchInput?.addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase();
 
-      if (!wall) return;
-
-      if (msgs.length === 0) {
-
-        wall.innerHTML = '';
-
-        return;
-
-      }
-
-      wall.innerHTML = msgs.map((m, i) => {
-
-        const hue =
-          [...(m.name || 'X')]
-            .reduce((a, c) =>
-              a + c.charCodeAt(0), 0
-            ) % 360;
-
-        const initials =
-          (m.name || 'A')
-            .slice(0, 2)
-            .toUpperCase();
-
-        const date =
-          new Date(m.created_at)
-            .toLocaleString();
-
-        return `
-
-          <article
-            class="card"
-            style="animation-delay:${i * 60}ms"
-          >
-
-            <div class="card-top">
-
-              <div
-                class="avatar"
-                style="--hue:${hue}"
-              >
-                ${initials}
-              </div>
-
-              <div class="meta">
-
-                <span class="author">
-                  ${m.name || 'Anonymous'}
-                </span>
-
-                <time class="time">
-                  ${date}
-                </time>
-
-              </div>
-
-            </div>
-
-            <p class="msg">
-              ${m.message}
-            </p>
-
-          </article>
-
-        `;
-
-      }).join('');
-
-      if (visibleCount) {
-        visibleCount.textContent =
-          String(msgs.length);
-      }
-
-      updateSearch(
-        searchInput?.value?.trim() || ''
+      const filtered = allMessages.filter((m) =>
+        (m.name || "").toLowerCase().includes(q) ||
+        (m.message || "").toLowerCase().includes(q)
       );
 
-    }
+      renderMessages(filtered);
+    });
+
+    // ---------------------------
+    // REFRESH BUTTON
+    // ---------------------------
+    refreshBtn?.addEventListener("click", loadMessages);
+
+    // ---------------------------
+    // INITIAL LOAD
+    // ---------------------------
+    loadMessages();
 
   </script>
 
@@ -332,64 +123,45 @@ try {
 <style>
 
 .page {
-  max-width: 760px;
-  margin: 0 auto;
-  padding: 48px 24px 80px;
+  max-width: 700px;
+  margin: auto;
+  padding: 40px;
 }
 
 .hero {
   text-align: center;
-  padding: 20px 0 48px;
-}
-
-.eyebrow {
-  font-size: .8rem;
-  color: goldenrod;
+  margin-bottom: 30px;
 }
 
 .headline {
-  font-size: 4rem;
-  margin: 10px 0;
-}
-
-.sub {
-  color: gray;
+  font-size: 3rem;
 }
 
 .search-row {
   display: flex;
   gap: 10px;
-  margin-bottom: 16px;
-}
-
-.search-wrap {
-  flex: 1;
+  margin-bottom: 20px;
 }
 
 .search-input {
-  width: 100%;
+  flex: 1;
   padding: 10px;
-}
-
-.refresh-btn {
-  padding: 10px 14px;
-  cursor: pointer;
 }
 
 .wall {
   display: grid;
-  gap: 16px;
+  gap: 15px;
 }
 
-.empty-state,
-.error-state {
-  text-align: center;
-  padding: 40px;
+.card {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
 }
 
-.no-results {
-  text-align: center;
-  margin-top: 20px;
+button {
+  padding: 10px 15px;
+  cursor: pointer;
 }
 
 </style>
